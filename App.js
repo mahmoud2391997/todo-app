@@ -8,7 +8,8 @@ const { Navigator, Screen } = createBottomTabNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
+  
+  <NavigationContainer>
       <Navigator
         screenOptions={{
           headerBackVisible: false,
@@ -21,6 +22,7 @@ export default function App() {
             borderTopColor: "grey",
             borderRadius: 20,
             left: "5%",
+            backgroundColor:"transparent"
           },
         }}
       >

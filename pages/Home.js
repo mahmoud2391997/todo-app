@@ -14,13 +14,30 @@ import {
   Button,
   FlatList,
   TouchableOpacity,
+  ImageBackground,
 } from "react-native";
+import DeleteConfirmationModal from './deleteModal';
 export default function Home() {
   const [text, setText] = useState('');
   const [description, setDescription] = useState('');
   const [alltodos, setAllTodos] = useState([]);
-
+  const [currentIndex,setCurrentIndex] = useState(null)
   const [viewedTodos, setViewedTodos] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  function setIndexToDelete(index) {
+    setCurrentIndex(index)
+  }
+ 
+
+  const handleOpenModal = () => {
+    setIsModalVisible(true); // Show the modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false); // Close the modal
+  };
+
 useEffect(()=>{ async function getStorage() {
   
   storage= await AsyncStorage.getItem("todos");
@@ -37,12 +54,15 @@ useEffect(()=>{ async function getStorage() {
 
   };
   const  handleDeleted =async (index) => {
+    setIsModalVisible(false); // Close the modal after deletion
+
     let todos = [...alltodos]
     todos.splice(index,1);
     setAllTodos(todos);
     setViewedTodos(todos);
     console.log(todos);
     await AsyncStorage.setItem("todos",JSON.stringify(todos) );
+
 
   };
   const getActiveList = () => {
@@ -75,8 +95,9 @@ useEffect(()=>{ async function getStorage() {
         }
       }
     };
-    const TodoItem = ({ text,description ,index}) => {
+    const TodoItem = ({ text,description ,index,setIndexToDelete}) => {
       return (
+        
         <View style={styles.item}>
          
          <TouchableOpacity style={styles.itemText}       onPress={() => navigation.navigate("Todo-details", { text })}
@@ -88,7 +109,10 @@ useEffect(()=>{ async function getStorage() {
          <View >
           
           <AntDesign name="checksquareo" size={20} color="green" onClick={()=>{handleDone(index)}} />
-          <Feather name="trash" size={20} color="red" onClick={()=>{handleDeleted(index)}}/>
+          <Feather name="trash" size={20} color="red" onClick={()=>{handleOpenModal()
+
+setIndexToDelete(index)
+          }}/>
          </View>
         </View>
       );
@@ -97,6 +121,10 @@ useEffect(()=>{ async function getStorage() {
     
     
   return (
+    <ImageBackground
+    style={{height:"100%"}}
+  source={"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQa790fnvCghIUQ0-Ku0ANNZfx2UGeUb75-cBPPkWc1laHWtvYWCFbwouu6HnUc4f3FjaE&usqp=CAU"} // Path to your background image
+  >
     <View style={styles.container}>
       <Text style={styles.text}>Todo App</Text>
       <StatusBar style="auto" />
@@ -106,13 +134,13 @@ useEffect(()=>{ async function getStorage() {
         value={text}
         onChangeText={setText}
         placeholder="Enter todo..."
-      />
+        />
       <TextInput
         style={styles.input}
         value={description}
         onChangeText={setDescription}
         placeholder="Enter todo..."
-      />
+        />
       <Button title="Add" style={styles.addButton}  onPress={handleAddTodo} />
     </View>
     <View style={styles.divider}/>
@@ -126,20 +154,27 @@ useEffect(()=>{ async function getStorage() {
 
       <FlatList
       style={{width:"100%"}}
-        data={viewedTodos}
-        renderItem={({ item ,index}) => <TodoItem text={item.text } description={item.description} index={index}/>}
-        keyExtractor={(item) => item.id.toString()}
+      data={viewedTodos}
+      renderItem={({ item ,index}) => <TodoItem text={item.text } description={item.description} setIndexToDelete={setIndexToDelete}/>}
+      keyExtractor={(item) => item.id.toString()}
+      />
+ <DeleteConfirmationModal
+        visible={isModalVisible}
+        onDelete={handleDeleted}
+        onClose={handleCloseModal}
+        index={currentIndex}
       />
     </View>
 
 
  </View>
+      </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     width:"100%",
     display:"flex",
     alignItems:"center"
